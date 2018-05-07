@@ -2402,6 +2402,9 @@ int mutt_index_menu(struct MuttWindow *dlg)
       }
 #endif
 
+#ifdef USE_DEVEL_HELP
+      case OP_HELP_BOX:
+#endif
       case OP_MAIN_CHANGE_FOLDER:
       case OP_MAIN_CHANGE_FOLDER_READONLY:
 #ifdef USE_NOTMUCH
