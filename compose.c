@@ -1968,7 +1968,6 @@ int mutt_compose_menu(struct Email *e, struct Buffer *fcc, struct Email *e_cur, 
         mutt_index_menu(dlgindex);
         dialog_pop();
         notify_observer_remove(NeoMutt->notify, mutt_dlgindex_observer, dlgindex);
-        index_pager_shutdown(dlgindex);
         mutt_window_free(&dlgindex);
         OptAttachMsg = false;
 

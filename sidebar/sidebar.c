@@ -1420,6 +1420,45 @@ int sb_observer(struct NotifyCallback *nc)
 }
 
 /**
+ * sb_win_init - XXX
+ */
+void sb_win_init(struct MuttWindow *dlg)
+{
+  dlg->orient = MUTT_WIN_ORIENT_HORIZONTAL;
+
+  struct MuttWindow *index_panel = TAILQ_FIRST(&dlg->children);
+  TAILQ_REMOVE(&dlg->children, index_panel, entries);
+
+  struct MuttWindow *pager_panel = TAILQ_FIRST(&dlg->children);
+  TAILQ_REMOVE(&dlg->children, pager_panel, entries);
+
+  struct MuttWindow *cont_right =
+      mutt_window_new(WT_CONTAINER, MUTT_WIN_ORIENT_VERTICAL, MUTT_WIN_SIZE_MAXIMISE,
+                      MUTT_WIN_SIZE_UNLIMITED, MUTT_WIN_SIZE_UNLIMITED);
+
+  mutt_window_add_child(cont_right, index_panel);
+  mutt_window_add_child(cont_right, pager_panel);
+
+  struct MuttWindow *win_sidebar =
+      mutt_window_new(WT_SIDEBAR, MUTT_WIN_ORIENT_HORIZONTAL, MUTT_WIN_SIZE_FIXED,
+                      C_SidebarWidth, MUTT_WIN_SIZE_UNLIMITED);
+  win_sidebar->state.visible = C_SidebarVisible && (C_SidebarWidth > 0);
+
+  if (C_SidebarOnRight)
+  {
+    mutt_window_add_child(dlg, cont_right);
+    mutt_window_add_child(dlg, win_sidebar);
+  }
+  else
+  {
+    mutt_window_add_child(dlg, win_sidebar);
+    mutt_window_add_child(dlg, cont_right);
+  }
+
+  notify_observer_add(NeoMutt->notify, sb_observer, win_sidebar);
+}
+
+/**
  * sb_init - Set up the Sidebar
  */
 void sb_init(void)

@@ -1226,7 +1226,6 @@ int main(int argc, char *argv[], char *envp[])
       mutt_index_menu(dlg);
       dialog_pop();
       notify_observer_remove(NeoMutt->notify, mutt_dlgindex_observer, dlg);
-      index_pager_shutdown(dlg);
       mutt_window_free(&dlg);
       ctx_free(&Context);
       log_queue_empty();
