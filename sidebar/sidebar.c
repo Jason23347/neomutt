@@ -47,6 +47,7 @@
 #include "muttlib.h"
 #include "observer.h"
 #include "opcodes.h"
+#include "view.h"
 #include "wdata.h"
 
 /* These Config Variables are only used in sidebar.c */
@@ -1384,6 +1385,11 @@ void sb_win_init(struct MuttWindow *dlg)
     mutt_window_add_child(dlg, win_sidebar);
     mutt_window_add_child(dlg, cont_right);
   }
+
+  win_sidebar->wdata = sb_windata_new();
+  win_sidebar->wdata_free = sb_windata_free;
+
+  sb_windata_populate(win_sidebar->wdata);
 
   // Only listen to OUR index events
   notify_observer_add(dlg->notify, sb_dialog_observer, win_sidebar);

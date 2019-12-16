@@ -468,7 +468,7 @@ $(PWD)/pop:
 # libsidebar
 @if USE_SIDEBAR
 LIBSIDEBAR=	libsidebar.a
-LIBSIDEBAROBJS=	sidebar/sidebar.o sidebar/commands.o sidebar/observer.o sidebar/wdata.o
+LIBSIDEBAROBJS=	sidebar/sidebar.o sidebar/commands.o sidebar/observer.o sidebar/view.o sidebar/wdata.o
 CLEANFILES+=	$(LIBSIDEBAR) $(LIBSIDEBAROBJS)
 ALLOBJS+=	$(LIBSIDEBAROBJS)
 

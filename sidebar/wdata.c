@@ -28,7 +28,9 @@
 
 #include "config.h"
 #include "mutt/lib.h"
+#include "core/lib.h"
 #include "sidebar/wdata.h"
+#include "sidebar/view.h"
 
 struct MuttWindow;
 
@@ -51,4 +53,51 @@ void sb_wdata_free(struct MuttWindow *win, void **ptr)
   // struct SidebarWindowData *sd = *ptr;
 
   FREE(ptr);
+}
+
+/**
+ * sb_windata_free - XXX
+ */
+void sb_windata_free(struct MuttWindow *win, void **ptr)
+{
+  struct SidebarWinData *data = *ptr;
+
+  // notify_observer_remove(NeoMutt->notify, sb_observer, win);
+
+  for (size_t i = 0; i < data->num_accounts; i++)
+  {
+    sb_account_free(&data->accounts[i]);
+  }
+
+  FREE(&data->accounts);
+  FREE(ptr);
+}
+
+/**
+ * sb_windata_new - XXX
+ */
+struct SidebarWinData *sb_windata_new(void)
+{
+  struct SidebarWinData *data = mutt_mem_calloc(1, sizeof(*data));
+
+  data->max_accounts = 25;
+  data->accounts =
+      mutt_mem_calloc(data->max_accounts, sizeof(struct SidebarAccountView *));
+
+  return data;
+}
+
+/**
+ * sb_windata_populate - XXX
+ */
+void sb_windata_populate(struct SidebarWinData *data)
+{
+  struct Account *np = NULL;
+
+  TAILQ_FOREACH(np, &NeoMutt->accounts, entries)
+  {
+    sb_account_add(data, np);
+  }
+
+  sb_account_dump(data);
 }

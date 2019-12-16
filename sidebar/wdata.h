@@ -48,4 +48,8 @@ struct SidebarWindowData
 void                      sb_wdata_free(struct MuttWindow *win, void **ptr);
 struct SidebarWindowData *sb_wdata_new(void);
 
+void                   sb_windata_free(struct MuttWindow *win, void **ptr);
+struct SidebarWinData *sb_windata_new(void);
+void                   sb_windata_populate(struct SidebarWinData *data);
+
 #endif /* MUTT_SIDEBAR_WDATA_H */
