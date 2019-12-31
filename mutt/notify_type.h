@@ -40,6 +40,7 @@ enum NotifyType
   NT_MAILBOX, ///< Mailbox has changed,         #NotifyMailbox, #EventMailbox
   NT_WINDOW,  ///< MuttWindow has changed,      #NotifyWindow,  #EventWindow
   NT_ALIAS,   ///< Alias has changed,           #NotifyAlias,   #EventAlias
+  NT_INDEX,   ///< Index dialog has changed
 };
 
 #endif /* MUTT_LIB_NOTIFY_TYPE_H */

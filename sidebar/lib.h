@@ -71,6 +71,8 @@ void            sb_notify_mailbox  (struct Mailbox *m, bool created);
 void            sb_set_open_mailbox(struct Mailbox *m);
 void            sb_win_init        (struct MuttWindow *dlg);
 
+struct MuttWindow *sb_create(struct MuttWindow *parent);
+
 enum CommandResult sb_parse_unwhitelist(struct Buffer *buf, struct Buffer *s, intptr_t data, struct Buffer *err);
 enum CommandResult sb_parse_whitelist  (struct Buffer *buf, struct Buffer *s, intptr_t data, struct Buffer *err);
 

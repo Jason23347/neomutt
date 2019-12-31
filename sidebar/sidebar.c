@@ -1410,6 +1410,9 @@ void sb_win_init(struct MuttWindow *dlg)
     mutt_window_add_child(dlg, cont_right);
   }
 
+  // Only listen to OUR index events
+  notify_observer_add(dlg->notify, sb_dialog_observer, win_sidebar);
+  // Listen to global events
   notify_observer_add(NeoMutt->notify, sb_neomutt_observer, win_sidebar);
 }
 
