@@ -1126,6 +1126,8 @@ enum CommandResult parse_set(struct Buffer *buf, struct Buffer *s,
 
     bool bq = false;
     bool equals = false;
+    bool increment = false;
+    bool decrement = false;
 
     struct HashElem *he = NULL;
     bool my = mutt_str_startswith(buf->data, "my_", CASE_MATCH);
@@ -1174,6 +1176,33 @@ enum CommandResult parse_set(struct Buffer *buf, struct Buffer *s,
 
       query = true;
       s->dptr++;
+    }
+    else if (*s->dptr == '+' || *s->dptr == '-')
+    {
+      if (prefix)
+      {
+        mutt_buffer_printf(err, "ERR04 can't use prefix when incrementing or "
+                                "decrementing a variable");
+        return MUTT_CMD_WARNING;
+      }
+
+      if (reset || unset || inv)
+      {
+        mutt_buffer_printf(err, "ERR05 can't set a variable with the '%s' command",
+                           set_commands[data]);
+        return MUTT_CMD_WARNING;
+      }
+      if (*s->dptr == '+')
+        increment = true;
+      else
+        decrement = true;
+
+      s->dptr++;
+      if (*s->dptr == '=')
+      {
+        equals = true;
+        s->dptr++;
+      }
     }
     else if (*s->dptr == '=')
     {
@@ -1302,6 +1331,22 @@ enum CommandResult parse_set(struct Buffer *buf, struct Buffer *s,
             mutt_buffer_reset(buf);
             mutt_buffer_addstr(buf, mutt_b2s(&scratch));
             mutt_buffer_dealloc(&scratch);
+          }
+          if (increment || decrement)
+          {
+            int add;
+            int initval = 0;
+
+            mutt_str_atoi(mutt_str_strdup(buf->data), &add);
+
+            rc = cs_subset_he_string_get(NeoMutt->sub, he, buf);
+            mutt_str_atoi(mutt_str_strdup(buf->data), &initval);
+
+            if (decrement)
+              add *= -1;
+
+            mutt_buffer_reset(buf);
+            mutt_buffer_printf(buf, "%d", initval + add);
           }
 
           rc = cs_subset_he_string_set(NeoMutt->sub, he, buf->data, err);
