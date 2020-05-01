@@ -4049,6 +4049,35 @@ int mutt_reply_observer(struct NotifyCallback *nc)
 }
 
 /**
+ * index_data_new - XXX
+ */
+struct IndexData *index_data_new(void)
+{
+  return mutt_mem_calloc(1, sizeof(struct IndexData));
+}
+
+/**
+ * index_data_free - XXX
+ */
+void index_data_free(struct IndexData **ptr)
+{
+  if (!ptr || !*ptr)
+    return;
+
+  // struct IndexData *sd = *ptr;
+
+  FREE(ptr);
+}
+
+/**
+ * index_wdata_free - XXX
+ */
+void index_wdata_free(struct MuttWindow *win, void **ptr)
+{
+  index_data_free((struct IndexData **) ptr);
+}
+
+/**
  * create_panel_index - Create the Windows for the Index panel
  * @param parent        Parent Window
  * @param status_on_top true, if the Index bar should be on top
@@ -4129,6 +4158,8 @@ struct MuttWindow *index_pager_init(void)
       mutt_window_new(WT_DLG_INDEX, MUTT_WIN_ORIENT_HORIZONTAL, MUTT_WIN_SIZE_MAXIMISE,
                       MUTT_WIN_SIZE_UNLIMITED, MUTT_WIN_SIZE_UNLIMITED);
   notify_observer_add(NeoMutt->notify, mutt_dlgindex_observer, dlg);
+  dlg->wdata = index_data_new();
+  dlg->wdata_free = index_wdata_free;
 
   mutt_window_add_child(dlg, create_panel_index(dlg, C_StatusOnTop));
   mutt_window_add_child(dlg, create_panel_pager(dlg, C_StatusOnTop));
@@ -4211,4 +4242,11 @@ int mutt_dlgindex_observer(struct NotifyCallback *nc)
 reflow:
   mutt_window_reflow(dlg);
   return 0;
+}
+
+void index_dlg_set_mailbox(struct Mailbox *m)
+{
+  // where do I start looking?
+  // struct MuttWindow *mutt_window_find(struct MuttWindow *root, enum WindowType type)
+  return;
 }

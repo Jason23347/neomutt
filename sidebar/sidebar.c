@@ -1409,6 +1409,24 @@ int sb_observer(struct NotifyCallback *nc)
 }
 
 /**
+ * sb_recalc - XXX
+ */
+int sb_recalc(void)
+{
+  mutt_debug(LL_DEBUG1, "SIDEBAR RECALC\n");
+  return -1;
+}
+
+/**
+ * sb_repaint - XXX
+ */
+int sb_repaint(void)
+{
+  mutt_debug(LL_DEBUG1, "SIDEBAR REPAINT\n");
+  return -1;
+}
+
+/**
  * sb_win_init - XXX
  */
 void sb_win_init(struct MuttWindow *dlg)

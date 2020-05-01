@@ -33,6 +33,17 @@ struct Menu;
 struct MuttWindow;
 struct NotifyCallback;
 
+/**
+ * struct IndexData - XXX
+ */
+struct IndexData
+{
+  struct Mailbox *current;
+};
+
+struct IndexData *index_data_new(void);
+void              index_data_free(struct IndexData **ptr);
+
 /* These Config Variables are only used in index.c */
 extern bool  C_ChangeFolderNext;
 extern bool  C_CollapseAll;
