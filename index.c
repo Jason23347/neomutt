@@ -671,6 +671,28 @@ static int mailbox_index_observer(struct NotifyCallback *nc)
 }
 
 /**
+ * index_dlg_set_mailbox - XXX
+ */
+void index_dlg_set_mailbox(struct MuttWindow *win, struct Mailbox *m)
+{
+  struct MuttWindow *dlg = mutt_window_dialog(win);
+  if (!dlg)
+    return;
+
+  struct IndexData *id = dlg->wdata;
+  if (!id)
+    return;
+
+  if (m == id->mailbox)
+    return;
+
+  id->mailbox = m;
+
+  struct EventIndexDlg eid = { dlg, id->mailbox };
+  notify_send(dlg->notify, NT_WINDOW, NT_INDEX_MAILBOX, &eid);
+}
+
+/**
  * change_folder_mailbox - Change to a different Mailbox by pointer
  * @param menu       Current Menu
  * @param m          Mailbox
@@ -703,6 +725,7 @@ static void change_folder_mailbox(struct Menu *menu, struct Mailbox *m,
     *oldcount = Context->mailbox->msg_count;
 
     int check = mx_mbox_close(&Context);
+    index_dlg_set_mailbox(menu->win_index, NULL);
     if (check != 0)
     {
 #ifdef USE_INOTIFY
@@ -739,6 +762,7 @@ static void change_folder_mailbox(struct Menu *menu, struct Mailbox *m,
   Context = mx_mbox_open(m, flags);
   if (Context)
   {
+    index_dlg_set_mailbox(menu->win_index, Context->mailbox);
     menu->current = ci_first_message(Context);
 #ifdef USE_INOTIFY
     mutt_monitor_add(NULL);
@@ -4242,11 +4266,4 @@ int mutt_dlgindex_observer(struct NotifyCallback *nc)
 reflow:
   mutt_window_reflow(dlg);
   return 0;
-}
-
-void index_dlg_set_mailbox(struct Mailbox *m)
-{
-  // where do I start looking?
-  // struct MuttWindow *mutt_window_find(struct MuttWindow *root, enum WindowType type)
-  return;
 }
