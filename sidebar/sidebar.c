@@ -79,6 +79,7 @@ struct SbEntry
   char box[256];           ///< Formatted Mailbox name
   struct Mailbox *mailbox; ///< Mailbox this represents
   bool is_hidden;          ///< Don't show, e.g. $sidebar_new_mail_only
+  enum ColorId color;      ///< Colour to use
 };
 
 static int EntryCount = 0;
@@ -89,6 +90,9 @@ static int TopIndex = -1; ///< First mailbox visible in sidebar
 static int OpnIndex = -1; ///< Current (open) mailbox
 static int HilIndex = -1; ///< Highlighted mailbox
 static int BotIndex = -1; ///< Last mailbox visible in sidebar
+
+short DividerWidth = 0;
+enum DivType DividerType = SB_DIV_USER;
 
 /**
  * sidebar_format_str - Format a string for the sidebar - Implements ::format_t
@@ -289,13 +293,7 @@ static const char *sidebar_format_str(char *buf, size_t buflen, size_t col, int 
 static void make_sidebar_entry(char *buf, size_t buflen, int width,
                                const char *box, struct SbEntry *sbe)
 {
-  if (!buf)
-    return;
-
-  if (box && sbe)
-    mutt_str_strfcpy(sbe->box, box, sizeof(sbe->box));
-  else
-    buf[0] = '\0';
+  mutt_str_strfcpy(sbe->box, box, sizeof(sbe->box));
 
   mutt_expando_format(buf, buflen, 0, width, NONULL(C_SidebarFormat),
                       sidebar_format_str, IP sbe, MUTT_FORMAT_NO_FLAGS);
@@ -676,10 +674,8 @@ static bool select_last(void)
 }
 
 /**
- * prepare_sidebar - Prepare the list of SbEntry's for the sidebar display
+ * calc_page - Prepare the list of SbEntry's for the sidebar display
  * @param page_size  The number of lines on a page
- * @retval false No, don't draw the sidebar
- * @retval true  Yes, draw the sidebar
  *
  * Before painting the sidebar, we determine which are visible, sort
  * them and set up our page pointers.
@@ -687,10 +683,10 @@ static bool select_last(void)
  * This is a lot of work to do each refresh, but there are many things that
  * can change outside of the sidebar that we don't hear about.
  */
-static bool prepare_sidebar(int page_size)
+static void calc_page(int page_size)
 {
-  if ((EntryCount == 0) || (page_size <= 0))
-    return false;
+  if (page_size <= 0)
+    return;
 
   const struct SbEntry *opn_entry = (OpnIndex >= 0) ? Entries[OpnIndex] : NULL;
   const struct SbEntry *hil_entry = (HilIndex >= 0) ? Entries[HilIndex] : NULL;
@@ -751,16 +747,61 @@ static bool prepare_sidebar(int page_size)
     BotIndex = EntryCount - 1;
 
   PreviousSort = C_SidebarSortMethod;
-  return true;
+  return;
+}
+
+/**
+ * calc_divider - Calculate the space needed for the divider
+ * @param[out] width Width of divider in screen columns
+ * @param[out] type  Type of divide to use, e.g. #SB_DIV_ASCII
+ */
+static void calc_divider(short *width, enum DivType *type)
+{
+  *type = SB_DIV_UTF8;
+
+  /* Calculate the width of the delimiter in screen cells */
+  *width = mutt_strwidth(C_SidebarDividerChar);
+  if (*width < 0)
+  {
+    *width = 1; /* Bad character */
+  }
+  else if (*width == 0)
+  {
+    if (C_SidebarDividerChar)
+      return; /* User has set empty string */
+
+    *width = 1; /* Unset variable */
+  }
+  else
+  {
+    *type = SB_DIV_USER; /* User config */
+  }
+
+  if (C_AsciiChars && (*type != SB_DIV_ASCII))
+  {
+    /* $ascii_chars overrides Unicode divider chars */
+    if (*type == SB_DIV_UTF8)
+    {
+      *type = SB_DIV_ASCII;
+    }
+    else if (C_SidebarDividerChar)
+    {
+      for (int i = 0; i < *width; i++)
+      {
+        if (C_SidebarDividerChar[i] & ~0x7F) /* high-bit is set */
+        {
+          *type = SB_DIV_ASCII;
+          *width = 1;
+          break;
+        }
+      }
+    }
+  }
 }
 
 /**
  * draw_divider - Draw a line between the sidebar and the rest of neomutt
- * @param win        Window to draw on
- * @param num_rows   Height of the Sidebar
- * @param num_cols   Width of the Sidebar
- * @retval 0   Empty string
- * @retval num Character occupies n screen columns
+ * @param win Window to draw on
  *
  * Draw a divider using characters from the config option "sidebar_divider_char".
  * This can be an ASCII or Unicode character.
@@ -769,68 +810,26 @@ static bool prepare_sidebar(int page_size)
  * If the user hasn't set $sidebar_divider_char we pick a character for them,
  * respecting the value of $ascii_chars.
  */
-static int draw_divider(struct MuttWindow *win, int num_rows, int num_cols)
+static void draw_divider(struct MuttWindow *win)
 {
-  if ((num_rows < 1) || (num_cols < 1))
-    return 0;
+  int num_rows = win->state.rows;
+  int num_cols = win->state.cols;
 
-  int delim_len;
-  enum DivType altchar = SB_DIV_UTF8;
-
-  /* Calculate the width of the delimiter in screen cells */
-  delim_len = mutt_strwidth(C_SidebarDividerChar);
-  if (delim_len < 0)
-  {
-    delim_len = 1; /* Bad character */
-  }
-  else if (delim_len == 0)
-  {
-    if (C_SidebarDividerChar)
-      return 0; /* User has set empty string */
-
-    delim_len = 1; /* Unset variable */
-  }
-  else
-  {
-    altchar = SB_DIV_USER; /* User config */
-  }
-
-  if (C_AsciiChars && (altchar != SB_DIV_ASCII))
-  {
-    /* $ascii_chars overrides Unicode divider chars */
-    if (altchar == SB_DIV_UTF8)
-    {
-      altchar = SB_DIV_ASCII;
-    }
-    else if (C_SidebarDividerChar)
-    {
-      for (int i = 0; i < delim_len; i++)
-      {
-        if (C_SidebarDividerChar[i] & ~0x7F) /* high-bit is set */
-        {
-          altchar = SB_DIV_ASCII;
-          delim_len = 1;
-          break;
-        }
-      }
-    }
-  }
-
-  if (delim_len > num_cols)
-    return 0;
+  if ((num_rows < 1) || (num_cols < 1) || (DividerWidth > num_cols))
+    return;
 
   mutt_curses_set_color(MT_COLOR_SIDEBAR_DIVIDER);
 
-  int col = C_SidebarOnRight ? 0 : (C_SidebarWidth - delim_len);
+  int col = C_SidebarOnRight ? 0 : (C_SidebarWidth - DividerWidth);
 
   for (int i = 0; i < num_rows; i++)
   {
     mutt_window_move(win, col, i);
 
-    switch (altchar)
+    switch (DividerType)
     {
       case SB_DIV_USER:
-        mutt_window_addstr(NONULL(C_SidebarDividerChar));
+        mutt_window_addstr(C_SidebarDividerChar);
         break;
       case SB_DIV_ASCII:
         mutt_window_addch('|');
@@ -840,8 +839,6 @@ static int draw_divider(struct MuttWindow *win, int num_rows, int num_cols)
         break;
     }
   }
-
-  return delim_len;
 }
 
 /**
@@ -1010,11 +1007,8 @@ static int calc_path_depth(const char *mbox, const char *delims, const char **la
 }
 
 /**
- * draw_sidebar - Write out a list of mailboxes, in a panel
- * @param win        Window to draw on
- * @param num_rows   Height of the Sidebar
- * @param num_cols   Width of the Sidebar
- * @param div_width  Width in screen characters taken by the divider
+ * calc_entries - Write out a list of mailboxes, in a panel
+ * @param win Window to draw on
  *
  * Display a list of mailboxes in a panel on the left.  What's displayed will
  * depend on our index markers: TopMailbox, OpnMailbox, HilMailbox, BotMailbox.
@@ -1030,14 +1024,17 @@ static int calc_path_depth(const char *mbox, const char *delims, const char **la
  * "sidebar_indent_string" and sorted: "sidebar_sort_method".  Finally, they're
  * trimmed to fit the available space.
  */
-static void draw_sidebar(struct MuttWindow *win, int num_rows, int num_cols, int div_width)
+static void calc_entries(struct MuttWindow *win)
 {
+  int num_rows = win->state.rows;
+  int num_cols = win->state.cols;
+
   struct SbEntry *entry = NULL;
   struct Mailbox *m = NULL;
   if (TopIndex < 0)
     return;
 
-  int w = MIN(num_cols, (C_SidebarWidth - div_width));
+  int w = MIN(num_cols, (C_SidebarWidth - DividerWidth));
   int row = 0;
   const char *display = NULL;
   struct Buffer result = mutt_buffer_make(256);
@@ -1051,36 +1048,31 @@ static void draw_sidebar(struct MuttWindow *win, int num_rows, int num_cols, int
     if (entryidx == OpnIndex)
     {
       if ((Colors->defs[MT_COLOR_SIDEBAR_INDICATOR] != 0))
-        mutt_curses_set_color(MT_COLOR_SIDEBAR_INDICATOR);
+        entry->color = MT_COLOR_SIDEBAR_INDICATOR;
       else
-        mutt_curses_set_color(MT_COLOR_INDICATOR);
+        entry->color = MT_COLOR_INDICATOR;
     }
     else if (entryidx == HilIndex)
-      mutt_curses_set_color(MT_COLOR_SIDEBAR_HIGHLIGHT);
+      entry->color = MT_COLOR_SIDEBAR_HIGHLIGHT;
     else if (m->has_new)
-      mutt_curses_set_color(MT_COLOR_SIDEBAR_NEW);
+      entry->color = MT_COLOR_SIDEBAR_NEW;
     else if (m->msg_unread > 0)
-      mutt_curses_set_color(MT_COLOR_SIDEBAR_UNREAD);
+      entry->color = MT_COLOR_SIDEBAR_UNREAD;
     else if (m->msg_flagged > 0)
-      mutt_curses_set_color(MT_COLOR_SIDEBAR_FLAGGED);
+      entry->color = MT_COLOR_SIDEBAR_FLAGGED;
     else if ((Colors->defs[MT_COLOR_SIDEBAR_SPOOLFILE] != 0) &&
              (mutt_str_strcmp(mailbox_path(m), C_Spoolfile) == 0))
     {
-      mutt_curses_set_color(MT_COLOR_SIDEBAR_SPOOLFILE);
+      entry->color = MT_COLOR_SIDEBAR_SPOOLFILE;
     }
     else
     {
       if (Colors->defs[MT_COLOR_SIDEBAR_ORDINARY] != 0)
-        mutt_curses_set_color(MT_COLOR_SIDEBAR_ORDINARY);
+        entry->color = MT_COLOR_SIDEBAR_ORDINARY;
       else
-        mutt_curses_set_color(MT_COLOR_NORMAL);
+        entry->color = MT_COLOR_NORMAL;
     }
 
-    int col = 0;
-    if (C_SidebarOnRight)
-      col = div_width;
-
-    mutt_window_move(win, col, row);
     if (Context && Context->mailbox && (Context->mailbox->realpath[0] != '\0') &&
         (mutt_str_strcmp(m->realpath, Context->mailbox->realpath) == 0))
     {
@@ -1111,9 +1103,7 @@ static void draw_sidebar(struct MuttWindow *win, int num_rows, int num_cols, int
     // before using short path.
     bool no_abbr = (mutt_str_strncmp(display, full_path, mutt_str_strlen(display)) != 0);
     if (C_SidebarShortPath)
-    {
       display = last_part;
-    }
 
     mutt_buffer_reset(&result);
 
@@ -1132,12 +1122,38 @@ static void draw_sidebar(struct MuttWindow *win, int num_rows, int num_cols, int
 
     char str[256];
     make_sidebar_entry(str, sizeof(str), w, mutt_b2s(&result), entry);
-    mutt_window_printf("%s", str);
+    mutt_str_strfcpy(entry->box, str, sizeof(entry->box));
     row++;
   }
   mutt_buffer_dealloc(&result);
+}
 
-  fill_empty_space(win, row, num_rows - row, div_width, w);
+/**
+ * draw_data - Draw the sidebar data onto the Window
+ * @param win Window to draw on
+ */
+static void draw_data(struct MuttWindow *win)
+{
+  int num_rows = win->state.rows;
+  int num_cols = win->state.cols;
+  struct SbEntry *entry = NULL;
+  int w = MIN(num_cols, (C_SidebarWidth - DividerWidth));
+  int row = 0;
+  int col = C_SidebarOnRight ? DividerWidth : 0;
+
+  fill_empty_space(win, row, num_rows - row, DividerWidth, w);
+  for (int entryidx = TopIndex; (entryidx < EntryCount) && (row < num_rows); entryidx++)
+  {
+    entry = Entries[entryidx];
+    if (entry->is_hidden)
+      continue;
+
+    mutt_curses_set_color(entry->color);
+    mutt_window_mvaddstr(win, col, row, entry->box);
+    row++;
+  }
+
+  fill_empty_space(win, row, num_rows - row, DividerWidth, w);
 }
 
 /**
@@ -1235,7 +1251,7 @@ void sb_notify_mailbox(struct Mailbox *m, bool created)
     return;
 
   /* Any new/deleted mailboxes will cause a refresh.  As long as
-   * they're valid, our pointers will be updated in prepare_sidebar() */
+   * they're valid, our pointers will be updated in calc_page() */
 
   if (created)
   {
@@ -1289,6 +1305,22 @@ void sb_notify_mailbox(struct Mailbox *m, bool created)
 }
 
 /**
+ * init_data - Initialise the sidebar data
+ *
+ * Get a list of all the Mailboxes.
+ */
+static void init_data(void)
+{
+  struct MailboxList ml = neomutt_mailboxlist_get_all(NeoMutt, MUTT_MAILBOX_ANY);
+  struct MailboxNode *np = NULL;
+  STAILQ_FOREACH(np, &ml, entries)
+  {
+    sb_notify_mailbox(np->mailbox, true);
+  }
+  neomutt_mailboxlist_clear(&ml);
+}
+
+/**
  * sb_recalc - XXX
  */
 int sb_recalc(void)
@@ -1310,44 +1342,23 @@ int sb_repaint(void)
  * sb_draw - Completely redraw the sidebar
  * @param win Window to draw on
  *
- * Completely refresh the sidebar region.  First draw the divider; then, for
- * each Mailbox, call make_sidebar_entry; finally blank out any remaining space.
+ * Completely refresh the sidebar region.  First calculate everything to be
+ * displayed, then display it and finally blank out any remaining space.
  */
 void sb_draw(struct MuttWindow *win)
 {
-  if (!C_SidebarVisible || !win)
-    return;
-
   if (!mutt_window_is_visible(win))
     return;
 
-  int col = 0, row = 0;
-  mutt_window_get_coords(win, &col, &row);
-
-  int num_rows = win->state.rows;
-  int num_cols = win->state.cols;
-
-  int div_width = draw_divider(win, num_rows, num_cols);
-
   if (!Entries)
-  {
-    struct MailboxList ml = neomutt_mailboxlist_get_all(NeoMutt, MUTT_MAILBOX_ANY);
-    struct MailboxNode *np = NULL;
-    STAILQ_FOREACH(np, &ml, entries)
-    {
-      sb_notify_mailbox(np->mailbox, true);
-    }
-    neomutt_mailboxlist_clear(&ml);
-  }
+    init_data();
 
-  if (!prepare_sidebar(num_rows))
-  {
-    fill_empty_space(win, 0, num_rows, div_width, num_cols - div_width);
-    return;
-  }
+  calc_divider(&DividerWidth, &DividerType);
+  calc_page(win->state.rows);
+  calc_entries(win);
 
-  draw_sidebar(win, num_rows, num_cols, div_width);
-  mutt_window_move(win, col, row);
+  draw_divider(win);
+  draw_data(win);
 }
 
 /**
