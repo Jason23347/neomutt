@@ -29,6 +29,7 @@
 #include "config.h"
 #include "mutt/lib.h"
 #include "core/lib.h"
+#include "gui/lib.h"
 #include "sidebar/wdata.h"
 #include "sidebar/view.h"
 
@@ -53,6 +54,18 @@ void sb_wdata_free(struct MuttWindow *win, void **ptr)
   // struct SidebarWindowData *sd = *ptr;
 
   FREE(ptr);
+}
+
+/**
+ * sb_wdata_get - Get the Sidebar data for this window
+ * @param win Window
+ */
+struct SidebarWindowData *sb_wdata_get(struct MuttWindow *win)
+{
+  if (!win || (win->type != WT_SIDEBAR))
+    return NULL;
+
+  return win->wdata;
 }
 
 /**
