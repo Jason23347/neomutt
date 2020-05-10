@@ -1217,9 +1217,7 @@ int main(int argc, char *argv[], char *envp[])
     }
     if (Context || !explicit_folder)
     {
-#ifdef USE_SIDEBAR
-      sb_set_open_mailbox(Context ? Context->mailbox : NULL);
-#endif
+      mailbox_changed(Context ? Context->mailbox : NULL, NT_MAILBOX_SWITCH);
       struct MuttWindow *dlg = index_pager_init();
       dialog_push(dlg);
       mutt_index_menu(dlg);

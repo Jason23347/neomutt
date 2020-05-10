@@ -67,7 +67,6 @@ enum DivType
 void            sb_change_mailbox  (int op);
 void            sb_draw            (struct MuttWindow *win);
 struct Mailbox *sb_get_highlight   (void);
-void            sb_notify_mailbox  (struct Mailbox *m, bool created);
 void            sb_set_open_mailbox(struct Mailbox *m);
 void            sb_win_init        (struct MuttWindow *dlg);
 

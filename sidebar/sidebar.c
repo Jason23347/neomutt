@@ -1140,50 +1140,6 @@ static void draw_sidebar(struct MuttWindow *win, int num_rows, int num_cols, int
 }
 
 /**
- * sb_draw - Completely redraw the sidebar
- * @param win Window to draw on
- *
- * Completely refresh the sidebar region.  First draw the divider; then, for
- * each Mailbox, call make_sidebar_entry; finally blank out any remaining space.
- */
-void sb_draw(struct MuttWindow *win)
-{
-  if (!C_SidebarVisible || !win)
-    return;
-
-  if (!mutt_window_is_visible(win))
-    return;
-
-  int col = 0, row = 0;
-  mutt_window_get_coords(win, &col, &row);
-
-  int num_rows = win->state.rows;
-  int num_cols = win->state.cols;
-
-  int div_width = draw_divider(win, num_rows, num_cols);
-
-  if (!Entries)
-  {
-    struct MailboxList ml = neomutt_mailboxlist_get_all(NeoMutt, MUTT_MAILBOX_ANY);
-    struct MailboxNode *np = NULL;
-    STAILQ_FOREACH(np, &ml, entries)
-    {
-      sb_notify_mailbox(np->mailbox, true);
-    }
-    neomutt_mailboxlist_clear(&ml);
-  }
-
-  if (!prepare_sidebar(num_rows))
-  {
-    fill_empty_space(win, 0, num_rows, div_width, num_cols - div_width);
-    return;
-  }
-
-  draw_sidebar(win, num_rows, num_cols, div_width);
-  mutt_window_move(win, col, row);
-}
-
-/**
  * sb_change_mailbox - Change the selected mailbox
  * @param op Operation code
  *
@@ -1372,6 +1328,50 @@ int sb_repaint(void)
 {
   mutt_debug(LL_DEBUG1, "SIDEBAR REPAINT\n");
   return -1;
+}
+
+/**
+ * sb_draw - Completely redraw the sidebar
+ * @param win Window to draw on
+ *
+ * Completely refresh the sidebar region.  First draw the divider; then, for
+ * each Mailbox, call make_sidebar_entry; finally blank out any remaining space.
+ */
+void sb_draw(struct MuttWindow *win)
+{
+  if (!C_SidebarVisible || !win)
+    return;
+
+  if (!mutt_window_is_visible(win))
+    return;
+
+  int col = 0, row = 0;
+  mutt_window_get_coords(win, &col, &row);
+
+  int num_rows = win->state.rows;
+  int num_cols = win->state.cols;
+
+  int div_width = draw_divider(win, num_rows, num_cols);
+
+  if (!Entries)
+  {
+    struct MailboxList ml = neomutt_mailboxlist_get_all(NeoMutt, MUTT_MAILBOX_ANY);
+    struct MailboxNode *np = NULL;
+    STAILQ_FOREACH(np, &ml, entries)
+    {
+      sb_notify_mailbox(np->mailbox, true);
+    }
+    neomutt_mailboxlist_clear(&ml);
+  }
+
+  if (!prepare_sidebar(num_rows))
+  {
+    fill_empty_space(win, 0, num_rows, div_width, num_cols - div_width);
+    return;
+  }
+
+  draw_sidebar(win, num_rows, num_cols, div_width);
+  mutt_window_move(win, col, row);
 }
 
 /**

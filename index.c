@@ -776,9 +776,7 @@ static void change_folder_mailbox(struct Menu *menu, struct Mailbox *m,
   if (((C_Sort & SORT_MASK) == SORT_THREADS) && C_CollapseAll)
     collapse_all(Context, menu, 0);
 
-#ifdef USE_SIDEBAR
-  sb_set_open_mailbox(Context ? Context->mailbox : NULL);
-#endif
+  mailbox_changed(Context ? Context->mailbox : NULL, NT_MAILBOX_SWITCH);
 
   mutt_clear_error();
   mutt_mailbox_check(Context ? Context->mailbox : NULL, MUTT_MAILBOX_CHECK_FORCE); /* force the mailbox check after we have changed the folder */
