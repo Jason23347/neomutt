@@ -1218,31 +1218,6 @@ struct Mailbox *sb_get_highlight(void)
 }
 
 /**
- * sb_set_open_mailbox - Set the 'open' Mailbox
- * @param m Mailbox
- *
- * Search through the list of mailboxes.
- * If a Mailbox has a matching path, set OpnMailbox to it.
- */
-void sb_set_open_mailbox(struct Mailbox *m)
-{
-  OpnIndex = -1;
-
-  if (!m)
-    return;
-
-  for (int entry = 0; entry < EntryCount; entry++)
-  {
-    if (mutt_str_strcmp(Entries[entry]->mailbox->realpath, m->realpath) == 0)
-    {
-      OpnIndex = entry;
-      HilIndex = entry;
-      break;
-    }
-  }
-}
-
-/**
  * sb_notify_mailbox - The state of a Mailbox is about to change
  * @param m       Folder
  * @param created True if folder created, false if deleted
