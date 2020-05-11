@@ -155,6 +155,9 @@ void mutt_window_free(struct MuttWindow **ptr)
 
   struct MuttWindow *win = *ptr;
 
+  struct EventWindow ev_w = { win, WN_NO_FLAGS };
+  notify_send(win->notify, NT_WINDOW, NT_WINDOW_DELETE, &ev_w);
+
   mutt_winlist_free(&win->children);
 
   if (win->wdata && win->wdata_free)
@@ -564,6 +567,9 @@ void mutt_window_add_child(struct MuttWindow *parent, struct MuttWindow *child)
   child->parent = parent;
 
   notify_set_parent(child->notify, parent->notify);
+
+  struct EventWindow ev_w = { child, WN_NO_FLAGS };
+  notify_send(child->notify, NT_WINDOW, NT_WINDOW_NEW, &ev_w);
 }
 
 /**

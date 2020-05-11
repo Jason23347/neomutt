@@ -64,12 +64,10 @@ enum DivType
   SB_DIV_UTF8,  ///< A unicode line-drawing character
 };
 
-void            sb_change_mailbox  (int op);
-void            sb_draw            (struct MuttWindow *win);
-struct Mailbox *sb_get_highlight   (void);
-void            sb_win_init        (struct MuttWindow *dlg);
-
-struct MuttWindow *sb_create(struct MuttWindow *parent);
+void            sb_change_mailbox(int op);
+void            sb_draw          (struct MuttWindow *win);
+struct Mailbox *sb_get_highlight (void);
+void            sb_win_init      (struct MuttWindow *dlg);
 
 enum CommandResult sb_parse_unwhitelist(struct Buffer *buf, struct Buffer *s, intptr_t data, struct Buffer *err);
 enum CommandResult sb_parse_whitelist  (struct Buffer *buf, struct Buffer *s, intptr_t data, struct Buffer *err);
