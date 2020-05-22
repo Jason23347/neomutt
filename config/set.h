@@ -136,6 +136,27 @@ struct ConfigSetType
   intptr_t (*native_get)(const struct ConfigSet *cs, void *var, const struct ConfigDef *cdef, struct Buffer *err);
 
   /**
+   * string_plus_equals - Add to a config item by string
+   * @param cs    Config items
+   * @param var   Variable to set
+   * @param cdef  Variable definition
+   * @param value Value to set
+   * @param err   Buffer for error messages
+   * @retval num Result, e.g. #CSR_SUCCESS
+   */
+  int (*string_plus_equals)(const struct ConfigSet *cs, void *var, struct ConfigDef *cdef, const char *value, struct Buffer *err);
+
+  /**
+   * string_minus_equals - Remove from a config item as a string
+   * @param cs     Config items
+   * @param var    Variable to get
+   * @param cdef   Variable definition
+   * @param result Buffer for results or error messages
+   * @retval num Result, e.g. #CSR_SUCCESS
+   */
+  int (*string_minus_equals)(const struct ConfigSet *cs, void *var, const struct ConfigDef *cdef, const char *value, struct Buffer *result);
+
+  /**
    * reset - Reset a config item to its initial value
    * @param cs   Config items
    * @param var  Variable to reset
