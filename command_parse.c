@@ -1334,6 +1334,15 @@ enum CommandResult parse_set(struct Buffer *buf, struct Buffer *s,
           }
           if (increment || decrement)
           {
+            if (increment)
+            {
+              rc = cs_subset_he_string_plus_equals(NeoMutt->sub, he, buf->data, err);
+            }
+            else
+            {
+              rc = cs_subset_he_string_minus_equals(NeoMutt->sub, he, buf->data, err);
+            }
+
             int add;
             int initval = 0;
 
