@@ -143,6 +143,26 @@ static intptr_t long_native_get(const struct ConfigSet *cs, void *var,
 }
 
 /**
+ * long_string_plus_equals - Add to a Long by string - Implements ConfigSetType::string_plus_equals()
+ */
+static int long_string_plus_equals(const struct ConfigSet *cs, void *var,
+                                     struct ConfigDef *cdef, const char *value,
+                                     struct Buffer *err)
+{
+  return CSR_ERR_CODE;
+}
+
+/**
+ * long_string_minus_equals - Subtract from a Long by string - Implements ConfigSetType::string_plus_equals()
+ */
+static int long_string_minus_equals(const struct ConfigSet *cs, void *var,
+                                    const struct ConfigDef *cdef,
+                                    const char *value, struct Buffer *result)
+{
+  return CSR_ERR_CODE;
+}
+
+/**
  * long_reset - Reset a Long to its initial value - Implements ConfigSetType::reset()
  */
 static int long_reset(const struct ConfigSet *cs, void *var,
@@ -178,8 +198,8 @@ void long_init(struct ConfigSet *cs)
     long_string_get,
     long_native_set,
     long_native_get,
-    NULL, // string_plus_equals
-    NULL, // string_minus_equals
+    long_string_plus_equals,
+    long_string_minus_equals,
     long_reset,
     NULL, // destroy
   };

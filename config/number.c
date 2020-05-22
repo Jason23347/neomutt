@@ -162,6 +162,26 @@ static intptr_t number_native_get(const struct ConfigSet *cs, void *var,
 }
 
 /**
+ * number_string_plus_equals - Add to a Number by string - Implements ConfigSetType::string_plus_equals()
+ */
+static int number_string_plus_equals(const struct ConfigSet *cs, void *var,
+                                     struct ConfigDef *cdef, const char *value,
+                                     struct Buffer *err)
+{
+  return CSR_ERR_CODE;
+}
+
+/**
+ * number_string_minus_equals - Subtract from a Number by string - Implements ConfigSetType::string_plus_equals()
+ */
+static int number_string_minus_equals(const struct ConfigSet *cs, void *var,
+                                      const struct ConfigDef *cdef,
+                                      const char *value, struct Buffer *result)
+{
+  return CSR_ERR_CODE;
+}
+
+/**
  * number_reset - Reset a Number to its initial value - Implements ConfigSetType::reset()
  */
 static int number_reset(const struct ConfigSet *cs, void *var,
@@ -197,8 +217,8 @@ void number_init(struct ConfigSet *cs)
     number_string_get,
     number_native_set,
     number_native_get,
-    NULL, // string_plus_equals
-    NULL, // string_minus_equals
+    number_string_plus_equals,
+    number_string_minus_equals,
     number_reset,
     NULL, // destroy
   };
