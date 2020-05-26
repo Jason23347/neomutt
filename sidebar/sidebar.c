@@ -39,15 +39,14 @@
 #include "email/lib.h"
 #include "core/lib.h"
 #include "gui/lib.h"
+#include "lib.h"
 #include "context.h"
 #include "format_flags.h"
 #include "globals.h"
 #include "mutt_menu.h"
 #include "muttlib.h"
 #include "opcodes.h"
-#ifdef USE_SIDEBAR
-#include "sidebar/lib.h"
-#endif
+#include "wdata.h"
 
 /* These Config Variables are only used in sidebar.c */
 short C_SidebarComponentDepth; ///< Config: (sidebar) Strip leading path components from sidebar folders
@@ -88,16 +87,6 @@ static int TopIndex = -1; ///< First mailbox visible in sidebar
 static int OpnIndex = -1; ///< Current (open) mailbox
 static int HilIndex = -1; ///< Highlighted mailbox
 static int BotIndex = -1; ///< Last mailbox visible in sidebar
-
-/**
- * enum DivType - Source of the sidebar divider character
- */
-enum DivType
-{
-  SB_DIV_USER,  ///< User configured using $sidebar_divider_char
-  SB_DIV_ASCII, ///< An ASCII vertical bar (pipe)
-  SB_DIV_UTF8,  ///< A unicode line-drawing character
-};
 
 /**
  * sidebar_format_str - Format a string for the sidebar - Implements ::format_t

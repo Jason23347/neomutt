@@ -27,6 +27,7 @@
 
 #include <stdbool.h>
 #include "mutt/lib.h"
+#include "mutt_commands.h"
 
 struct Mailbox;
 struct MuttWindow;
@@ -52,6 +53,16 @@ extern struct ListHead SidebarWhitelist;
 
 void sb_init    (void);
 void sb_shutdown(void);
+
+/**
+ * enum DivType - Source of the sidebar divider character
+ */
+enum DivType
+{
+  SB_DIV_USER,  ///< User configured using $sidebar_divider_char
+  SB_DIV_ASCII, ///< An ASCII vertical bar (pipe)
+  SB_DIV_UTF8,  ///< A unicode line-drawing character
+};
 
 void            sb_change_mailbox  (int op);
 void            sb_draw            (struct MuttWindow *win);
