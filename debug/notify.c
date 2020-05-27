@@ -137,6 +137,8 @@ static const char *get_mailbox_event(int id)
       return "invalid";
     case NT_MAILBOX_RESORT:
       return "resort";
+    case NT_MAILBOX_SWITCH:
+      return "switch";
     case NT_MAILBOX_UPDATE:
       return "update";
     case NT_MAILBOX_UNTAG:

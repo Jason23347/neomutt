@@ -154,7 +154,9 @@ typedef uint8_t WindowNotifyFlags; ///< Changes to a MuttWindow
  */
 enum NotifyWindow
 {
-  NT_WINDOW_STATE = 1, ///< Window state has changed, e.g. #WN_VISIBLE
+  NT_WINDOW_NEW = 1, ///< New Window has been added
+  NT_WINDOW_DELETE,  ///< Window is about to be deleted
+  NT_WINDOW_STATE,   ///< Window state has changed, e.g. #WN_VISIBLE
 };
 
 /**

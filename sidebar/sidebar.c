@@ -45,6 +45,7 @@
 #include "globals.h"
 #include "mutt_menu.h"
 #include "muttlib.h"
+#include "observer.h"
 #include "opcodes.h"
 #include "wdata.h"
 
@@ -1356,59 +1357,6 @@ void sb_notify_mailbox(struct Mailbox *m, bool created)
 }
 
 /**
- * sb_observer - Listen for config changes affecting the sidebar - Implements ::observer_t
- * @param nc Notification data
- * @retval bool True, if successful
- */
-int sb_observer(struct NotifyCallback *nc)
-{
-  if (!nc->event_data || !nc->global_data)
-    return -1;
-  if (nc->event_type != NT_CONFIG)
-    return 0;
-
-  struct MuttWindow *win = nc->global_data;
-  struct EventConfig *ec = nc->event_data;
-
-  if (mutt_str_strncmp(ec->name, "sidebar_", 8) != 0)
-    return 0;
-
-  bool repaint = false;
-
-  if (win->state.visible != C_SidebarVisible)
-  {
-    window_set_visible(win, C_SidebarVisible);
-    repaint = true;
-  }
-
-  if (win->req_cols != C_SidebarWidth)
-  {
-    win->req_cols = C_SidebarWidth;
-    repaint = true;
-  }
-
-  struct MuttWindow *parent = win->parent;
-  struct MuttWindow *first = TAILQ_FIRST(&parent->children);
-
-  if ((C_SidebarOnRight && (first == win)) || (!C_SidebarOnRight && (first != win)))
-  {
-    // Swap the Sidebar and the Container of the Index/Pager
-    TAILQ_REMOVE(&parent->children, first, entries);
-    TAILQ_INSERT_TAIL(&parent->children, first, entries);
-    repaint = true;
-  }
-
-  if (repaint)
-  {
-    mutt_debug(LL_NOTIFY, "repaint sidebar\n");
-    mutt_window_reflow(MuttDialogWindow);
-    mutt_menu_set_current_redraw_full();
-  }
-
-  return 0;
-}
-
-/**
  * sb_recalc - XXX
  */
 int sb_recalc(void)
@@ -1462,7 +1410,7 @@ void sb_win_init(struct MuttWindow *dlg)
     mutt_window_add_child(dlg, cont_right);
   }
 
-  notify_observer_add(NeoMutt->notify, sb_observer, win_sidebar);
+  notify_observer_add(NeoMutt->notify, sb_neomutt_observer, win_sidebar);
 }
 
 /**

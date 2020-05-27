@@ -164,6 +164,7 @@ enum NotifyMailbox
   NT_MAILBOX_CLOSED,  ///< Mailbox was closed
   NT_MAILBOX_INVALID, ///< Email list was changed
   NT_MAILBOX_RESORT,  ///< Email list needs resorting
+  NT_MAILBOX_SWITCH,  ///< Current Mailbox has changed
   NT_MAILBOX_UPDATE,  ///< Update internal tables
   NT_MAILBOX_UNTAG,   ///< Clear the 'last-tagged' pointer
 };

@@ -38,7 +38,24 @@ struct NotifyCallback;
  */
 struct IndexData
 {
-  struct Mailbox *current;
+  struct Mailbox *mailbox;
+};
+
+/**
+ * struct EventIndexDlg
+ */
+struct EventIndexDlg
+{
+  struct MuttWindow *dlg;
+  struct Mailbox *mailbox;
+};
+
+/**
+ * NotifyIndexDlg - XXX
+ */
+enum NotifyIndexDlg
+{
+  NT_INDEX_MAILBOX = 1, ///< Current Mailbox has changed
 };
 
 struct IndexData *index_data_new(void);
