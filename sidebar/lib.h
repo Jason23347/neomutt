@@ -27,11 +27,13 @@
 
 #include <stdbool.h>
 #include "mutt/lib.h"
+#include "gui/lib.h"
 #include "mutt_commands.h"
 
 struct Mailbox;
 struct MuttWindow;
 struct NotifyCallback;
+struct SidebarWindowData;
 
 /* These Config Variables are only used in sidebar.c */
 extern short C_SidebarComponentDepth;
@@ -55,6 +57,17 @@ void sb_init    (void);
 void sb_shutdown(void);
 
 /**
+ * struct SbEntry - Info about folders in the sidebar
+ */
+struct SbEntry
+{
+  char box[256];           ///< Formatted Mailbox name
+  struct Mailbox *mailbox; ///< Mailbox this represents
+  bool is_hidden;          ///< Don't show, e.g. $sidebar_new_mail_only
+  enum ColorId color;      ///< Colour to use
+};
+
+/**
  * enum DivType - Source of the sidebar divider character
  */
 enum DivType
@@ -65,6 +78,7 @@ enum DivType
 };
 
 void            sb_change_mailbox  (struct MuttWindow *win, int op);
+bool            select_next        (struct SidebarWindowData *wdata);
 void            sb_draw          (struct MuttWindow *win);
 struct Mailbox *sb_get_highlight   (struct MuttWindow *win);
 void            sb_set_open_mailbox(struct MuttWindow *win, struct Mailbox *m);
