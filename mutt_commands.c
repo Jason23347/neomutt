@@ -42,6 +42,9 @@
 #include "keymap.h"
 #include "mutt_lua.h"
 #include "score.h"
+#ifdef USE_SIDEBAR
+#include "sidebar/lib.h"
+#endif
 
 // clang-format off
 const struct Command Commands[] = {

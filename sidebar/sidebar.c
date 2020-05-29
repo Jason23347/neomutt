@@ -68,6 +68,8 @@ short C_SidebarWidth;      ///< Config: (sidebar) Width of the sidebar
 /* Previous values for some sidebar config */
 static short PreviousSort = SORT_ORDER; /* sidebar_sort_method */
 
+struct ListHead SidebarWhitelist = STAILQ_HEAD_INITIALIZER(SidebarWhitelist); ///< List of mailboxes to always display in the sidebar
+
 /**
  * struct SbEntry - Info about folders in the sidebar
  */
@@ -1415,4 +1417,24 @@ int sb_observer(struct NotifyCallback *nc)
   }
 
   return 0;
+}
+
+/**
+ * sb_init - Set up the Sidebar
+ */
+void sb_init(void)
+{
+  // Soon this will initialise the Sidebar's:
+  // - Colours
+  // - Commands
+  // - Config
+  // - Functions
+}
+
+/**
+ * sb_shutdown - Clean up the Sidebar
+ */
+void sb_shutdown(void)
+{
+  mutt_list_free(&SidebarWhitelist);
 }

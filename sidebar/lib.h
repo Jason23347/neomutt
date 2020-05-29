@@ -47,6 +47,11 @@ extern short C_SidebarSortMethod;
 extern bool  C_SidebarVisible;
 extern short C_SidebarWidth;
 
+extern struct ListHead SidebarWhitelist;
+
+void sb_init    (void);
+void sb_shutdown(void);
+
 void            sb_change_mailbox  (int op);
 void            sb_draw            (struct MuttWindow *win);
 struct Mailbox *sb_get_highlight   (void);
