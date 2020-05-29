@@ -56,11 +56,13 @@
 #include "mx.h"
 #include "myvar.h"
 #include "options.h"
-#include "sidebar.h"
 #include "version.h"
 #include "imap/lib.h"
 #ifdef ENABLE_NLS
 #include <libintl.h>
+#endif
+#ifdef USE_SIDEBAR
+#include "sidebar/lib.h"
 #endif
 
 /* LIFO designed to contain the list of config files that have been sourced and
