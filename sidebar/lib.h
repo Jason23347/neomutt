@@ -59,4 +59,7 @@ void            sb_notify_mailbox  (struct Mailbox *m, bool created);
 int             sb_observer        (struct NotifyCallback *nc);
 void            sb_set_open_mailbox(struct Mailbox *m);
 
+enum CommandResult sb_parse_unwhitelist(struct Buffer *buf, struct Buffer *s, intptr_t data, struct Buffer *err);
+enum CommandResult sb_parse_whitelist  (struct Buffer *buf, struct Buffer *s, intptr_t data, struct Buffer *err);
+
 #endif /* MUTT_SIDEBAR_H */

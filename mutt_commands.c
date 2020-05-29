@@ -111,7 +111,7 @@ const struct Command Commands[] = {
   { "setenv",              parse_setenv,           MUTT_SET_SET },
   { "shutdown-hook",       mutt_parse_hook,        MUTT_SHUTDOWN_HOOK | MUTT_GLOBAL_HOOK },
 #ifdef USE_SIDEBAR
-  { "sidebar_whitelist",   parse_path_list,        IP &SidebarWhitelist },
+  { "sidebar_whitelist",   sb_parse_whitelist,     0 },
 #endif
   { "source",              parse_source,           0 },
   { "spam",                parse_spam_list,        MUTT_SPAM },
@@ -149,7 +149,7 @@ const struct Command Commands[] = {
   { "unset",               parse_set,              MUTT_SET_UNSET },
   { "unsetenv",            parse_setenv,           MUTT_SET_UNSET },
 #ifdef USE_SIDEBAR
-  { "unsidebar_whitelist", parse_path_unlist,      IP &SidebarWhitelist },
+  { "unsidebar_whitelist", sb_parse_unwhitelist,   0 },
 #endif
   { "unsubjectrx",         parse_unsubjectrx_list, IP &SubjectRegexList },
   { "unsubscribe",         parse_unsubscribe,      0 },
