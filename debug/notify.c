@@ -45,6 +45,8 @@ static const char *get_event_type(enum NotifyType type)
   {
     case NT_ACCOUNT:
       return "account";
+    case NT_ALIAS:
+      return "alias";
     case NT_COLOR:
       return "color";
     case NT_COMMAND:
@@ -57,6 +59,8 @@ static const char *get_event_type(enum NotifyType type)
       return "email";
     case NT_GLOBAL:
       return "global";
+    case NT_INDEX:
+      return "index";
     case NT_MAILBOX:
       return "mailbox";
     case NT_WINDOW:
@@ -368,6 +372,9 @@ int debug_notify_observer(struct NotifyCallback *nc)
     case NT_ACCOUNT:
       notify_dump_account(nc);
       break;
+    // case NT_ALIAS:
+    //   notify_dump_alias(nc);
+    //   break;
     case NT_COLOR:
       notify_dump_color(nc);
       break;
@@ -386,6 +393,9 @@ int debug_notify_observer(struct NotifyCallback *nc)
     case NT_GLOBAL:
       notify_dump_global(nc);
       break;
+    // case NT_INDEX:
+    //   notify_dump_index(nc);
+    //   break;
     case NT_MAILBOX:
       notify_dump_mailbox(nc);
       break;
@@ -399,7 +409,8 @@ int debug_notify_observer(struct NotifyCallback *nc)
       break;
   }
 
-  mutt_debug(LL_DEBUG1, "\tGlobal Data: %p\n", nc->global_data);
+  if (nc->global_data)
+    mutt_debug(LL_DEBUG1, "\tGlobal Data: %p\n", nc->global_data);
 
   return 0;
 }

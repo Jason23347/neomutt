@@ -573,6 +573,27 @@ void mutt_window_add_child(struct MuttWindow *parent, struct MuttWindow *child)
 }
 
 /**
+ * mutt_window_remove_child - Remove a child from a Window
+ * @param parent Window to remove from
+ * @param child  Window to remove
+ */
+struct MuttWindow *mutt_window_remove_child(struct MuttWindow *parent, struct MuttWindow *child)
+{
+  if (!parent || !child)
+    return NULL;
+
+  struct EventWindow ev_w = { child, WN_NO_FLAGS };
+  notify_send(child->notify, NT_WINDOW, NT_WINDOW_DELETE, &ev_w);
+
+  TAILQ_REMOVE(&parent->children, child, entries);
+  child->parent = NULL;
+
+  notify_set_parent(child->notify, NULL);
+
+  return child;
+}
+
+/**
  * mutt_winlist_free - Free a tree of Windows
  * @param head WindowList to free
  */
@@ -707,6 +728,7 @@ void dialog_push(struct MuttWindow *dlg)
 
   TAILQ_INSERT_TAIL(&MuttDialogWindow->children, dlg, entries);
   notify_set_parent(dlg->notify, MuttDialogWindow->notify);
+  // QWQ notify NT_DIALOG - allow plugins to integrate
   dlg->state.visible = true;
   dlg->parent = MuttDialogWindow;
   mutt_window_reflow(MuttDialogWindow);

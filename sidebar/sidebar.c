@@ -972,13 +972,10 @@ struct Mailbox *sb_get_highlight(struct MuttWindow *win)
  *
  * Before a deletion, check that our pointers won't be invalidated.
  */
-void sb_notify_mailbox(struct Mailbox *m, bool created)
+void sb_notify_mailbox(struct SidebarWindowData *wdata, struct Mailbox *m, bool created)
 {
   if (!m)
     return;
-
-  struct MuttWindow *win = NULL;
-  struct SidebarWindowData *wdata = sb_wdata_get(win);
 
   /* Any new/deleted mailboxes will cause a refresh.  As long as
    * they're valid, our pointers will be updated in calc_page() */
@@ -1039,13 +1036,13 @@ void sb_notify_mailbox(struct Mailbox *m, bool created)
  *
  * Get a list of all the Mailboxes.
  */
-static void init_data(void)
+static void init_data(struct SidebarWindowData *wdata)
 {
   struct MailboxList ml = neomutt_mailboxlist_get_all(NeoMutt, MUTT_MAILBOX_ANY);
   struct MailboxNode *np = NULL;
   STAILQ_FOREACH(np, &ml, entries)
   {
-    sb_notify_mailbox(np->mailbox, true);
+    sb_notify_mailbox(wdata, np->mailbox, true);
   }
   neomutt_mailboxlist_clear(&ml);
 }
@@ -1085,7 +1082,7 @@ void sb_draw(struct MuttWindow *win)
     return;
 
   if (!wdata->entries)
-    init_data(/*wdata*/);
+    init_data(wdata);
 
   calc_divider(wdata);
   calc_page(win, wdata, win->state.rows);
@@ -1133,15 +1130,15 @@ void sb_win_init(struct MuttWindow *dlg)
     mutt_window_add_child(dlg, cont_right);
   }
 
-  win_sidebar->wdata = sb_windata_new();
-  win_sidebar->wdata_free = sb_windata_free;
+  // win_sidebar->wdata = sb_windata_new();
+  // win_sidebar->wdata_free = sb_windata_free;
 
-  sb_windata_populate(win_sidebar->wdata);
+  // sb_windata_populate(win_sidebar->wdata);
 
-  // Only listen to OUR index events
-  notify_observer_add(dlg->notify, sb_dialog_observer, win_sidebar);
   // Listen to global events
   notify_observer_add(NeoMutt->notify, sb_neomutt_observer, win_sidebar);
+  // Only listen to OUR index events
+  notify_observer_add(dlg->notify, sb_dialog_observer, win_sidebar);
 }
 
 /**

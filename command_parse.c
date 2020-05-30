@@ -61,9 +61,6 @@
 #ifdef ENABLE_NLS
 #include <libintl.h>
 #endif
-#ifdef USE_SIDEBAR
-#include "sidebar/lib.h"
-#endif
 
 /* LIFO designed to contain the list of config files that have been sourced and
  * avoid cyclic sourcing */
@@ -968,7 +965,6 @@ enum CommandResult parse_mailboxes(struct Buffer *buf, struct Buffer *s,
       neomutt_account_add(NeoMutt, a);
     }
 
-    mailbox_changed(m, NT_MAILBOX_ADD);
 #ifdef USE_INOTIFY
     mutt_monitor_add(m);
 #endif

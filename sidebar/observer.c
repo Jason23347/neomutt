@@ -135,11 +135,23 @@ int sb_command_observer(struct MuttWindow *win, struct Command *cmd)
 int sb_config_observer(struct MuttWindow *win, struct EventConfig *ec)
 {
   // NT_CONFIG
-  //   sidebar_*
-  //   ascii_chars
-  //   folder
-  //   spoolfile
-  //   status_on_top
+  //   sidebar_component_depth        - recalc text
+  //   sidebar_delim_chars            - recalc text
+  //   sidebar_divider_char           - recalc divider
+  //   sidebar_folder_indent          - recalc text
+  //   sidebar_format                 - recalc text
+  //   sidebar_indent_string          - recalc text
+  //   sidebar_new_mail_only          - recalc text
+  //   sidebar_next_new_wrap          - NO ACTION
+  //   sidebar_non_empty_mailbox_only - recalc text
+  //   sidebar_on_right               - repaint
+  //   sidebar_short_path             - recalc text
+  //   sidebar_sort_method            - recalc text
+  //   sidebar_visible                - XXX?
+  //   sidebar_width                  - recalc text
+  //   ascii_chars                    - recalc divider
+  //   folder                         - recalc text
+  //   spoolfile                      - recalc colours
 
   // if (!nc->event_data || !nc->global_data)
   //   return -1;
@@ -203,8 +215,8 @@ int sb_mailbox_observer(struct MuttWindow *win, struct EventMailbox *ec)
 
   // struct EventMailbox *em = nc->event_data;
   // struct Mailbox *m = em->mailbox;
-  // struct SidebarWinData *data = win->wdata;
-  // struct SidebarAccountView *av = sb_account_find(data, m->account);
+  // struct SidebarWinData *wdata = win->wdata;
+  // struct SidebarAccountView *av = sb_account_find(wdata, m->account);
 
   // if (nc->event_subtype == NT_MAILBOX_ADD)
   //   sb_mailbox_add(av, m);
@@ -220,6 +232,19 @@ int sb_mailbox_observer(struct MuttWindow *win, struct EventMailbox *ec)
 }
 
 /**
+ * sb_window_observer - XXX
+ */
+int sb_window_observer(struct MuttWindow *win, struct EventWindow *ec)
+{
+  // NT_WINDOW
+  //   NT_WINDOW_NEW
+  //   NT_WINDOW_DELETE
+  //   NT_WINDOW_STATE
+
+  return 0;
+}
+
+/**
  * sb_neomutt_observer - XXX
  */
 int sb_neomutt_observer(struct NotifyCallback *nc)
@@ -228,6 +253,7 @@ int sb_neomutt_observer(struct NotifyCallback *nc)
     return -1;
 
   struct MuttWindow *win = nc->global_data;
+  // struct SidebarWinData *wdata = win ? win->wdata : NULL;
 
   switch (nc->event_type)
   {
@@ -241,6 +267,8 @@ int sb_neomutt_observer(struct NotifyCallback *nc)
       return sb_config_observer(win, nc->event_data);
     case NT_MAILBOX:
       return sb_mailbox_observer(win, nc->event_data);
+    case NT_WINDOW:
+      return sb_window_observer(win, nc->event_data);
     default:
       return 0;
   }
